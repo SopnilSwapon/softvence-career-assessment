@@ -28,9 +28,9 @@ const FAQSection = () => {
   ]
 
   return (
-    <section className="relative w-full bg-background-main py-16 sm:py-20 md:py-24" id="faq">
+    <section className="relative w-full text-black py-16 sm:py-20 md:py-24">
       {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0">
         <img 
           src="/images/img_ellipse_29.png" 
           alt="" 
@@ -46,10 +46,10 @@ const FAQSection = () => {
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 sm:mb-20">
-          <h2 className="text-[32px] sm:text-[40px] md:text-[48px] font-bold leading-[38px] sm:leading-[48px] md:leading-[57px] text-text-secondary mb-2">
+          <h2 className="text-[32px] sm:text-[40px] md:text-[48px] font-bold leading-[38px] sm:leading-[48px] md:leading-[57px] mb-2">
             Frequently Asked Questions
           </h2>
-          <p className="text-base font-normal leading-base text-text-muted">
+          <p className="text-base font-normal leading-base">
             Quick answers to help you get the most out of our app.
           </p>
         </div>
