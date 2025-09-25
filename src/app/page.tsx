@@ -1,3 +1,4 @@
+import FAQSection from "./components/FAQSection";
 import HeroSection from "./components/HeroSection";
 
 export default function Home() {
@@ -8,9 +9,9 @@ export default function Home() {
       <UserFeaturesSection />
       <EmployeeFeaturesSection />
       <BusinessOwnerFeaturesSection />
-      <TestimonialsSection />
+      <TestimonialsSection /> */}
       <FAQSection />
-      <DownloadSection /> */}
+      {/* <DownloadSection /> */}
     </main>
   );
 }
