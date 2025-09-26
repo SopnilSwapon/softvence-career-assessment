@@ -1,6 +1,7 @@
-'use client';
-import { useState } from 'react';
-import { twMerge } from 'tailwind-merge';
+"use client";
+import Image from "next/image";
+import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface ExpandableItem {
   id: string;
@@ -15,37 +16,37 @@ interface ExpandableListProps {
   allowMultiple?: boolean;
 }
 
-const ExpandableList = ({ 
-  items, 
+const ExpandableList = ({
+  items,
   className,
-  allowMultiple = false 
+  allowMultiple = false,
 }: ExpandableListProps) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
-    new Set(items.filter(item => item.isExpanded).map(item => item.id))
-  )
+    new Set(items.filter((item) => item.isExpanded).map((item) => item.id)),
+  );
 
   const toggleItem = (itemId: string) => {
-    setExpandedItems(prev => {
-      const newSet = new Set(prev)
-      
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev);
+
       if (newSet.has(itemId)) {
-        newSet.delete(itemId)
+        newSet.delete(itemId);
       } else {
         if (!allowMultiple) {
-          newSet.clear()
+          newSet.clear();
         }
-        newSet.add(itemId)
+        newSet.add(itemId);
       }
-      
-      return newSet
-    })
-  }
+
+      return newSet;
+    });
+  };
 
   return (
-    <div className={twMerge('space-y-4', className)}>
+    <div className={twMerge("space-y-4", className)}>
       {items.map((item) => {
-        const isExpanded = expandedItems.has(item.id)
-        
+        const isExpanded = expandedItems.has(item.id);
+
         return (
           <div
             key={item.id}
@@ -63,21 +64,25 @@ const ExpandableList = ({
               </span>
               <div className="flex-shrink-0 ml-4">
                 {isExpanded ? (
-                  <img 
-                    src="/images/img_icon.svg" 
-                    alt="Collapse" 
+                  <Image
+                    src="/images/img_icon.svg"
+                    width={4}
+                    height={4}
+                    alt="Collapse"
                     className="w-4 h-4 transform rotate-180 transition-transform duration-200"
                   />
                 ) : (
-                  <img 
-                    src="/images/img_icon_blue_gray_900.svg" 
-                    alt="Expand" 
+                  <Image
+                    src="/images/img_icon_blue_gray_900.svg"
+                    width={4}
+                    height={4}
+                    alt="Expand"
                     className="w-4 h-4 transition-transform duration-200"
                   />
                 )}
               </div>
             </button>
-            
+
             {/* Content */}
             {isExpanded && (
               <div
@@ -90,10 +95,10 @@ const ExpandableList = ({
               </div>
             )}
           </div>
-        )
+        );
       })}
     </div>
-  )
-}
+  );
+};
 
-export default ExpandableList
+export default ExpandableList;

@@ -6,16 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface ResetPasswordResponse {
-  message?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  message: string;
+  [key: string]: string;
 }
 
 interface VerifyOtpResponse {
-  token?: string;
-  message?: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  token: string;
+  message: string;
+  [key: string]: string;
 }
 export default function NewPassword() {
   const [showPassword, setShowPassword] = useState(false);

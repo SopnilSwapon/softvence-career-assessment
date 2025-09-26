@@ -8,17 +8,12 @@ import Testimonials from "./components/Testimonials";
 
 export default function Home() {
   return (
-       <main className="w-full bg-white">
-        <Navbar/>
+    <main>
+      <Navbar />
       <HeroSection />
-      <Services/>
-      <AudienceSection/>
-      <Testimonials/>
-      {/* <FeaturesSection />
-      <UserFeaturesSection />
-      <EmployeeFeaturesSection />
-      <BusinessOwnerFeaturesSection />
-      <TestimonialsSection /> */}
+      <Services />
+      <AudienceSection />
+      <Testimonials />
       <FAQSection />
       <Footer />
     </main>
