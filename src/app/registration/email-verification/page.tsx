@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import axios from "axios";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function EmailVerification() {
@@ -60,12 +60,12 @@ export default function EmailVerification() {
         },
       );
 
-      if (response.data.success) {
-        setSuccessMessage(response.data.message || "OTP sent successfully!");
+      const data = response.data as { success: boolean; message?: string };
+
+      if (data.success) {
+        setSuccessMessage(data.message || "OTP sent successfully!");
       } else {
-        setError(
-          response.data.message || "Failed to resend OTP. Please try again.",
-        );
+        setError(data.message || "Failed to resend OTP. Please try again.");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -111,13 +111,13 @@ export default function EmailVerification() {
         },
       );
 
-      if (response.data.success) {
-        console.log("Verification successful:", response.data);
-        navigate.push("/login");
+      const data = response.data as { success: boolean; message?: string };
+
+      if (data.success) {
+        console.log("Verification successful:", data);
+        navigate.push("/registration/register-success");
       } else {
-        setError(
-          response.data.message || "OTP verification failed. Please try again.",
-        );
+        setError(data.message || "OTP verification failed. Please try again.");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

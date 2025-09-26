@@ -56,7 +56,7 @@ export default function Page() {
       }
 
       // If success redirect to verify page
-      router.push("/email-verification");
+      router.push("/registration/email-verification");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -132,6 +132,7 @@ export default function Page() {
                 <input
                   type="checkbox"
                   id="terms"
+                  required
                   className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   {...register("terms")}
                 />
