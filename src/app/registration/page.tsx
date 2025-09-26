@@ -27,7 +27,7 @@ export default function RoleSection() {
         {/* Role Selection Cards */}
         <div className="flex flex-col sm:flex-row gap-8 w-full max-w-2xl">
           {/* Client Card */}
-          <Link href="/registration/client-user">
+          <Link href="/registration/user-type">
             <div className="group flex-1 border-2 border-primary-100 rounded-2xl p-8 text-center hover:border-primary-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="mb-6">
                 <Image
@@ -46,7 +46,7 @@ export default function RoleSection() {
               </p>
             </div>
           </Link>
-          <Link href="/registration/client-user">
+          <Link href="/registration/user-type">
             <div className="group flex-1 bg-white border-2 border-gray-200 rounded-2xl p-8 text-center hover:border-primary-200 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
               <div className="mb-6">
                 <Image
