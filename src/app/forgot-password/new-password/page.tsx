@@ -103,6 +103,7 @@ export default function NewPassword() {
           response.data.message || "OTP verified successfully!",
         );
         setOtpVerified(true);
+        navigate.push("/forgot-password/reset-success");
       } else {
         setError(
           (response.data as { message?: string }).message ||
