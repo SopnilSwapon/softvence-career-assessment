@@ -12,8 +12,16 @@ export default function EmailVerification() {
   const [loadingResend, setLoadingResend] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const email = localStorage.getItem("registering-email");
+  const [email, setEmail] = useState<string | null>(null);
   const navigate = useRouter();
+
+  // ✅ load email from localStorage only on client
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedEmail = localStorage.getItem("registering-email");
+      setEmail(savedEmail);
+    }
+  }, []);
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
@@ -41,7 +49,7 @@ export default function EmailVerification() {
 
     try {
       const formData = new FormData();
-      formData.append("email", email! || "");
+      formData.append("email", email || "");
 
       const response = await axios.post(
         "https://apitest.softvencefsd.xyz/api/resend_otp",
@@ -102,14 +110,15 @@ export default function EmailVerification() {
       const data = response.data as { status: boolean; message?: string };
 
       if (data.status) {
-        localStorage.removeItem("registering-email");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("registering-email");
+        }
         navigate.push("/registration/register-success");
       } else {
         setError(data.message || "OTP verification failed. Please try again.");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Verify OTP error:", err);
       setError(
         err.response?.data?.message ||
           "An unexpected error occurred. Please try again later.",
@@ -141,8 +150,9 @@ export default function EmailVerification() {
             Please check your email!
           </h1>
           <p className="text-gray-600">
-            We have emailed a 6-digit confirmation code to {email}, please enter
-            the code in below box to verify your email.
+            We have emailed a 6-digit confirmation code to{" "}
+            {email || "your email"}, please enter the code in below box to
+            verify your email.
           </p>
         </div>
 

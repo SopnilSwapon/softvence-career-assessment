@@ -5,17 +5,12 @@ import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-interface ResetPasswordResponse {
-  message: string;
-  [key: string]: string;
-}
-
 interface VerifyOtpResponse {
-  token: string;
-  message: string;
-  [key: string]: string;
+  token?: string;
+  message?: string;
+  [key: string]: unknown;
 }
-export default function NewPassword() {
+export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -30,20 +25,22 @@ export default function NewPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const email = localStorage.getItem("forgetting-email");
+  const [email, setEmail] = useState<string | null>(null); // <-- store email in state
   const navigate = useRouter();
 
+  // localStorage in client only
   useEffect(() => {
-    if (!email) {
-      setError(
-        "Email not found in URL. Please go back to forgot password page.",
-      );
+    if (typeof window !== "undefined") {
+      const storedEmail = localStorage.getItem("forgetting-email");
+      setEmail(storedEmail);
+      if (!storedEmail) {
+        setError("Email not found. Please go back to forgot password page.");
+      }
     }
-  }, [email]);
+  }, []);
 
-  const validateEmail = (email: string) => {
-    return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
-  };
+  const validateEmail = (email: string) =>
+    /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
   const handleOtpInputChange = (index: number, value: string) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
@@ -51,7 +48,6 @@ export default function NewPassword() {
       newOtp[index] = value;
       setOtp(newOtp);
 
-      // Auto-focus next input
       if (value && index < 5) {
         otpInputRefs.current[index + 1]?.focus();
       }
@@ -84,38 +80,16 @@ export default function NewPassword() {
     try {
       const response = await axios.post<VerifyOtpResponse>(
         "https://apitest.softvencefsd.xyz/api/forgot-verify-otp",
-        {
-          email,
-          otp: verificationOtp,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        { email, otp: verificationOtp },
       );
 
-      if (response.data) {
-        setToken(response.data.token || "");
-        setSuccessMessage(
-          response.data.message || "OTP verified successfully!",
-        );
-        setOtpVerified(true);
-        navigate.push("/forgot-password/reset-success");
-      } else {
-        setError(
-          (response.data as { message?: string }).message ||
-            "OTP verification failed. Please try again.",
-        );
-      }
+      setToken(response.data?.token || "");
+      setSuccessMessage(response.data?.message || "OTP verified successfully!");
+      setOtpVerified(true);
+      navigate.push("/forgot-password/reset-success");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Verify OTP error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
-      }
+      setError(err.response?.data?.message || "OTP verification failed.");
     } finally {
       setLoading(false);
     }
@@ -141,34 +115,18 @@ export default function NewPassword() {
 
     setLoading(true);
     try {
-      const response = await axios.post<ResetPasswordResponse>(
+      const response = await axios.post<{ message?: string }>(
         "https://apitest.softvencefsd.xyz/api/reset-password",
-        {
-          password,
-          password_confirmation: confirmPassword,
-          token,
-        },
+        { password, password_confirmation: confirmPassword, token },
       );
 
-      if (response.data) {
-        setSuccessMessage(
-          response.data.message || "Password updated successfully!",
-        );
-        navigate.push("/login");
-      } else {
-        setError(
-          (response.data as { message?: string }).message ||
-            "Failed to update password. Please try again.",
-        );
-      }
+      setSuccessMessage(
+        response.data?.message || "Password updated successfully!",
+      );
+      navigate.push("/login");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Set new password error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
-      }
+      setError(err.response?.data?.message || "Failed to update password.");
     } finally {
       setLoading(false);
     }
@@ -202,7 +160,9 @@ export default function NewPassword() {
           <p className="text-gray-600 text-center">
             {otpVerified
               ? "Please enter your new password below."
-              : `We've sent an OTP to ${email}. Please enter the code to verify.`}
+              : `We've sent an OTP to ${
+                  email || "your email"
+                }. Please enter the code to verify.`}
           </p>
         </div>
 

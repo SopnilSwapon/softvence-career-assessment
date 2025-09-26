@@ -5,6 +5,11 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+interface ForgotPasswordResponse {
+  message: string;
+  data: { status: boolean };
+  [key: string]: unknown;
+}
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,12 +33,6 @@ export default function ForgotPassword() {
 
     setLoading(true);
     try {
-      interface ForgotPasswordResponse {
-        message?: string;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        [key: string]: any;
-      }
-
       const response = await axios.post<ForgotPasswordResponse>(
         "https://apitest.softvencefsd.xyz/api/forgot-password",
         {
@@ -46,7 +45,6 @@ export default function ForgotPassword() {
         },
       );
       const data: ForgotPasswordResponse = response.data;
-      console.log(data);
       if (data.status === 201) {
         setSuccessMessage(
           data.message || "Password reset link sent to your email.",
@@ -61,7 +59,6 @@ export default function ForgotPassword() {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Forgot password error:", err);
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
