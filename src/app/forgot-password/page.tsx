@@ -47,10 +47,11 @@ export default function ForgotPassword() {
       );
       const data: ForgotPasswordResponse = response.data;
       console.log(data);
-      if (data && data.message) {
+      if (data.status === 201) {
         setSuccessMessage(
           data.message || "Password reset link sent to your email.",
         );
+        localStorage.setItem("forgetting-email", email);
         navigate.push("/forgot-password/new-password"); // Redirect to new password page with email
       } else {
         setError(
