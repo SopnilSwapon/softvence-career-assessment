@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -29,9 +30,46 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+  //   setError(null);
+  //   setLoading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("first_name", data.first_name);
+  //     formData.append("last_name", data.last_name);
+  //     formData.append("email", data.email);
+  //     formData.append("password", data.password);
+  //     formData.append("password_confirmation", data.password_confirmation);
+  //     formData.append("terms", String(data.terms));
+
+  //     const res = await fetch("https://apitest.softvencefsd.xyz/api/register", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+
+  //     const contentType = res.headers.get("content-type") || "";
+  //     const payload = contentType.includes("application/json")
+  //       ? await res.json()
+  //       : await res.text();
+
+  //     if (!res.ok) {
+  //       throw new Error(payload?.message || "Registration failed");
+  //     }
+  //     localStorage.setItem("registering-email", data.email);
+  //     // If success redirect to verify page
+  //     router.push("/registration/email-verification");
+  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  //   } catch (err: any) {
+  //     setError(err.message || "Something went wrong");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     setError(null);
     setLoading(true);
+
     try {
       const formData = new FormData();
       formData.append("first_name", data.first_name);
@@ -41,25 +79,30 @@ export default function Page() {
       formData.append("password_confirmation", data.password_confirmation);
       formData.append("terms", String(data.terms));
 
-      const res = await fetch("https://apitest.softvencefsd.xyz/api/register", {
-        method: "POST",
-        body: formData,
-      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res: { status: number; data: any } = await axios.post(
+        "https://apitest.softvencefsd.xyz/api/register",
+        formData,
+      );
 
-      const contentType = res.headers.get("content-type") || "";
-      const payload = contentType.includes("application/json")
-        ? await res.json()
-        : await res.text();
+      // Axios automatically parses JSON response
+      const payload = res.data;
 
-      if (!res.ok) {
+      if (res.status !== 200 && res.status !== 201) {
         throw new Error(payload?.message || "Registration failed");
       }
 
-      // If success redirect to verify page
+      // Save email for OTP verification
+      localStorage.setItem("registering-email", data.email);
+
+      // Redirect to email verification page
       router.push("/registration/email-verification");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      console.error("Registration error:", err);
+      setError(
+        err.response?.data?.message || err.message || "Something went wrong",
+      );
     } finally {
       setLoading(false);
     }

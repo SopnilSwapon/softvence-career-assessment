@@ -8,15 +8,12 @@ import Link from "next/link";
 export default function EmailVerification() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [email] = useState("user@example.com"); // TODO: Get email from previous page/context
-  const [loading, setLoading] = useState(false);
+  const [loadingVerify, setLoadingVerify] = useState(false);
+  const [loadingResend, setLoadingResend] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const email = localStorage.getItem("registering-email");
   const navigate = useRouter();
-
-  const validateEmail = (email: string) => {
-    return /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
-  };
 
   const handleInputChange = (index: number, value: string) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
@@ -24,7 +21,6 @@ export default function EmailVerification() {
       newCode[index] = value;
       setCode(newCode);
 
-      // Auto-focus next input
       if (value && index < 5) {
         inputRefs.current[index + 1]?.focus();
       }
@@ -37,84 +33,77 @@ export default function EmailVerification() {
     }
   };
 
+  // 🔹 Resend OTP
   const handleResendCode = async () => {
     setError(null);
     setSuccessMessage(null);
+    setLoadingResend(true);
 
-    if (!email || !validateEmail(email)) {
-      setError("Please provide a valid email address to resend OTP.");
-      return;
-    }
-
-    setLoading(true);
     try {
+      const formData = new FormData();
+      formData.append("email", email! || "");
+
       const response = await axios.post(
         "https://apitest.softvencefsd.xyz/api/resend_otp",
-        {
-          email,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        formData,
       );
 
-      const data = response.data as { success: boolean; message?: string };
+      const data = response.data as {
+        success?: boolean;
+        message?: string;
+        status: number;
+      };
 
-      if (data.success) {
+      if (data.status === 201) {
         setSuccessMessage(data.message || "OTP sent successfully!");
+        setCode(["", "", "", "", "", ""]);
       } else {
         setError(data.message || "Failed to resend OTP. Please try again.");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Resend OTP error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
-      }
+      setError(
+        err.response?.data?.message ||
+          "An unexpected error occurred. Please try again later.",
+      );
     } finally {
-      setLoading(false);
+      setLoadingResend(false);
     }
   };
 
+  // 🔹 Verify OTP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+
     const verificationCode = code.join("");
-
-    if (!email || !validateEmail(email)) {
-      setError("Email is required for verification.");
-      return;
-    }
-
     if (verificationCode.length !== 6) {
       setError("Please enter the 6-digit verification code.");
       return;
     }
 
-    setLoading(true);
+    setLoadingVerify(true);
     try {
+      const formData = new FormData();
+      formData.append("email", email || "");
+      formData.append("otp", verificationCode);
+
       const response = await axios.post(
         "https://apitest.softvencefsd.xyz/api/verify_otp",
-        {
-          email,
-          otp: verificationCode,
-        },
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         },
       );
 
-      const data = response.data as { success: boolean; message?: string };
+      const data = response.data as { status: boolean; message?: string };
 
-      if (data.success) {
-        console.log("Verification successful:", data);
+      if (data.status) {
+        localStorage.removeItem("registering-email");
         navigate.push("/registration/register-success");
       } else {
         setError(data.message || "OTP verification failed. Please try again.");
@@ -122,13 +111,12 @@ export default function EmailVerification() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Verify OTP error:", err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An unexpected error occurred. Please try again later.");
-      }
+      setError(
+        err.response?.data?.message ||
+          "An unexpected error occurred. Please try again later.",
+      );
     } finally {
-      setLoading(false);
+      setLoadingVerify(false);
     }
   };
 
@@ -180,7 +168,7 @@ export default function EmailVerification() {
                 onChange={(e) => handleInputChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 className="w-14 h-14 text-center text-lg font-medium border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                disabled={loading}
+                disabled={loadingVerify}
               />
             ))}
           </div>
@@ -188,10 +176,10 @@ export default function EmailVerification() {
           {/* Verify Button */}
           <button
             type="submit"
-            disabled={code.join("").length !== 6 || loading}
+            disabled={code.join("").length !== 6 || loadingVerify}
             className="w-full bg-primary hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-md shadow-primary/20"
           >
-            {loading ? "Verifying..." : "Verify"}
+            {loadingVerify ? "Verifying..." : "Verify"}
           </button>
 
           {/* Resend Code */}
@@ -200,10 +188,10 @@ export default function EmailVerification() {
             <button
               type="button"
               onClick={handleResendCode}
-              className="font-semibold text-primary hover:text-primary-700"
-              disabled={loading}
+              className="font-semibold text-primary hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loadingResend}
             >
-              {loading ? "Resending..." : "Resend code"}
+              {loadingResend ? "Resending..." : "Resend code"}
             </button>
           </div>
         </form>
