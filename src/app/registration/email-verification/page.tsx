@@ -62,7 +62,6 @@ export default function EmailVerification() {
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      console.error("Resend OTP error:", err);
       setError(
         err.response?.data?.message ||
           "An unexpected error occurred. Please try again later.",
